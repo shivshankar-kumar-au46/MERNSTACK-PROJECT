@@ -4,25 +4,41 @@ export const useProductStore = create((set) => ({
     products: [],
     setProducts: (products) => set({ products }),
     createProduct: async (newProduct) => {
-        if (!newProduct.name || !newProduct.image || !newProduct.price) {
-            return { success: false, message: "Please fill all fields" }
-        }
-        const res = await fetch("/api/products", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(newProduct),
 
-        })
+        try {
+            if (!newProduct.name || !newProduct.image || !newProduct.price) {
+                return { success: false, message: "Please fill all fields" }
+            }
+            const res = await fetch("/api/products", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newProduct),
+
+            })
+            if (res.status === 500) {
+                return { success: false, message: res.statusText }
+            } else {
+                const data = await res.json();
+                if (!data.success) {
+                    return { success: false, message: data.message }
+                } else {
+                    set((state) => ({ products: [...state.products, data.data] }))
+                    return { success: true, message: "Product created successfully" }
+                }
+            }
+
+
+
+        } catch (error) {
+            return { success: false, message: error }
+        }
+    },
+    fetchProduct: async () => {
+        const res = await fetch("/api/products");
         const data = await res.json();
-        if (!data.success) {
-            return { success: false, message: data.message }
-        } else {
-            set((state) => ({ products: [...state.products, data.data] }))
-            return { success: true, message: "Product created successfully" }
-        }
-
+        set({ products: data.data });
 
     }
 }))
