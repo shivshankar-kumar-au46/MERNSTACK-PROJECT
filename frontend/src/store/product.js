@@ -40,5 +40,24 @@ export const useProductStore = create((set) => ({
         const data = await res.json();
         set({ products: data.data });
 
-    }
-}))
+    },
+    deleteProduct: async (pid) => {
+        const res = await fetch(`/api/products/${pid}`,{
+            method:"DELETE",
+        });
+        const data = await res.json();
+        if(!data.success) return {success:false,message:data.message}
+//updated the ui immediately, without need any refresh
+        set(state => ({products: state.products.filter(product => product._id != pid)}))
+        return {success:true,message:data.message}
+    },
+//     updateProduct: async(pid,updatedProduct) => {
+// const res = await fetch(`/api/products/${pid}`,{
+//     method:"PUT",
+//     headers:{
+//         "Content-Type:":"application/json"
+//     },
+
+// })
+//     }
+}));
